@@ -29,7 +29,7 @@ headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleW
 
 #Input: A string containing URL, a string containing system headers
 #Output: An array info, with product info
-def get_product_info(url,headers):
+def get_product_info(url,headers,userPath):
 	
 	#Request Site Data 
 	req = requests.get(url,headers=headers)
@@ -89,7 +89,7 @@ def get_product_info(url,headers):
 	description = product_page.find(id="tab-1")
 	info.append(description.text.strip())
 	
-	driver = webdriver.Chrome('/Users/CarterDuncan/Downloads/chromedriver')
+	driver = webdriver.Chrome(userPath)
 	driver.get(url)
 	color = driver.find_elements_by_xpath('//a[@class="swatch-color-ahref"]')
 	colors = [] 
@@ -207,7 +207,9 @@ k1_url = "https://www.tentree.com/collections/kids/products/kids-emb-graphic-tsh
 
 print("Please past the link to a product page now:")
 user_url = input() 
-test = get_product_info(user_url,headers)
+print("Please enter the pathway to your chrome driver")
+userPath = input() 
+test = get_product_info(user_url,headers,userPath)
 write_to_csv(test)
 
 
