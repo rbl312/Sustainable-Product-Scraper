@@ -205,10 +205,10 @@ k1_url = "https://www.tentree.com/collections/kids/products/kids-emb-graphic-tsh
 #print(get_product_info(m2_url,headers), "\n")
 #print(get_product_info(k1_url,headers), "\n")
 
-#print("Please past the link to a product page now:")
-#user_url = input() 
-#test = get_product_info(user_url,headers)
-#write_to_csv(test)
+print("Please past the link to a product page now:")
+user_url = input() 
+test = get_product_info(user_url,headers)
+write_to_csv(test)
 
 
 #json_test(men_url,headers)
