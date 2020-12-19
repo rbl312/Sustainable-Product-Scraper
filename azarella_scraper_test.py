@@ -18,6 +18,7 @@ from bs4 import BeautifulSoup
 import requests
 import json
 import csv 
+import sys 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
@@ -88,7 +89,7 @@ def get_product_info(url,headers,userPath):
 	###############		PRODUCT SIZES + COLORS 	####################
 	description = product_page.find(id="tab-1")
 	info.append(description.text.strip())
-	
+	 
 	driver = webdriver.Chrome(userPath)
 	driver.get(url)
 	color = driver.find_elements_by_xpath('//a[@class="swatch-color-ahref"]')
@@ -102,6 +103,8 @@ def get_product_info(url,headers,userPath):
 	for s in range(len(size)):
 		sizes.append(size[s].text.strip())
 	info.append(sizes)
+	#info = format_csv(info)
+	info.append(url)
 	return info 
 
 #Input: A string containing topic page url, a string containing system headers
@@ -160,33 +163,61 @@ def get_product_pages(url, headers):
 	
 def write_to_csv(data):
 	#NEED CSV TO BE IN UTF-8 ENCODING... CHECK INTERNET 
-	with open('product_info.csv', mode='w', encoding="utf-8-sig") as csv_file:
+	title = str(data[0])
+	title = title.replace(" ","_")
+	print(title)
+	title = title + '.csv'
+	print(title)
+	with open(title, mode='w', encoding="utf-8-sig") as csv_file:
 		csv_writer = csv.writer(csv_file, delimiter=',')
+		print(data)
+		print(type(data))
 		#Write each product info in one row at a time 
-		temp = [] 
-		for elm in data:
-			csv_writer.writerow([elm])
+		csv_writer.writerow(data)
 
-def json_test(url,headers):
+#def format_csv(data):
+#	print(data)
+#	new = ""
+#	for d in data: 
+#		temp = str(d) + ";"
+#		new = new + temp 
+#	print(new)
+#	return new 
+
+def json_test(url,headers):	
+	response = requests.get(url)
+	soup = BeautifulSoup(response.text,'html.parser')	
+
+	ld = soup.find_all('script')
+	for l in ld:
+		if 'application' in l:
+			print("YES")
+
+#	scripts = soup.find_all('script')
+#	for s in scripts:
+#		print(s)
+
+
+#	driver = webdriver.Chrome('/Users/CarterDuncan/Downloads/chromedriver')
+#	driver.get(url)
+#	json = driver.find_elements_by_xpath('//script[@type="application/ld+json"]')
+#	temp = [] 
+#	for j in range(len(json)):
+#		temp.append(json[j].text)
+#		print(temp)
+
+#	html = file_get_contents(url);
+#	dom  = new DOMDocument();
+#	libxml_use_internal_errors(1);
+#	dom->loadHTML(html);
+#	xpath = new DOMXpath(dom);
+#	jsonScripts = $xpath->query( '//script[@type="application/ld+json"]' );
+#	json = trim( $jsonScripts->item(0)->nodeValue );
+#	data = json_decode(json);
+
 
 	
-	#Request Site Data 
-	req = requests.get(url,headers=headers)
-	
-	#Get text of site 
-	page = req.text
-	
-	#This creates a Beautiful Soup object that will parse all that structured HTML data 
-	soup = BeautifulSoup(page,"html.parser")
-	script = soup.find_all("script")
 
-	
-	
-	driver = webdriver.Chrome('/Users/CarterDuncan/Downloads/chromedriver')
-	driver.get(url)
-	json = driver.find_elements_by_xpath('//*[@id="pageContent"]/script[5]')
-	for j in range(len(json)):
-		print(j)
 
 
 website = "https://www.tentree.com/collections/womens-pants" 
@@ -205,15 +236,31 @@ k1_url = "https://www.tentree.com/collections/kids/products/kids-emb-graphic-tsh
 #print(get_product_info(m2_url,headers), "\n")
 #print(get_product_info(k1_url,headers), "\n")
 
-print("Please past the link to a product page now:")
-user_url = input() 
-print("Please enter the pathway to your chrome driver")
-userPath = input() 
-test = get_product_info(user_url,headers,userPath)
-write_to_csv(test)
+
+#print("Please past the link to a product page now:")
+#user_url = input() 
+#print("Please enter the pathway to your chromedriver")
+#path = input()
+#test = get_product_info(user_url,headers,path)
+#write_to_csv(test)
+
+
+with open(sys.argv[1], 'r') as f: 
+	driver_path = f.readline().strip()
+	
+	url = f.readline().strip()
+	while url: 
+		print(url)
+		test = get_product_info(url,headers,driver_path)
+		write_to_csv(test)
+		url = f.readline().strip()
+	f.close()
+
+			
 
 
 #json_test(men_url,headers)
+
 #get_product_info(men_url,headers)
 
 
@@ -235,3 +282,10 @@ write_to_csv(test)
 #JSONLD
 #JSON LINKED DYNAMIC - JAVASCRIPT INTERNALS 
 #THEN CRAWLER JUST PULLS MICRODATA FROM JSONLD
+
+
+#HAVE CSV NAMED AFTER PRODUCT NAME 
+#INCLUDE URL TO WEBSITE IN CSV 
+
+#ADD IO FUNCTIONALITY TO READ N AMOUNT OF LINKS FROM A TEXT FILE 
+#MAKE A CSV PER LINK 
